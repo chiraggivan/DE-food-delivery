@@ -1,9 +1,16 @@
-# Data Engineering Portfolio
+# Project: End-to-End Data Engineering Project for a Food Delivery Company
 
-## About Me
-I’m a data engineer learning to build scalable data pipelines using AWS. I’m passionate about automating data workflows and solving real-world problems with technology, particularly in the context of operational data for a food delivery company.
+## Description
 
-## Project: Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company
+This project implements an end-to-end data engineering pipeline for a food delivery company, automating the flow of operational data from a relational database management system (RDBMS) to a data warehouse for advanced analytics. The pipeline extracts data from an Amazon RDS MySQL database, transfers it to an AWS S3 bucket, loads it into Snowflake (a cloud-based data warehouse), and performs ETL (Extract, Transform, Load) processes within Snowflake to create a star schema model. The final output is a structured dataset ready for business intelligence and analytical reporting, enabling data analysts to derive insights into customer behavior, delivery trends, and operational performance.
+
+The project leverages modern cloud technologies and best practices in data engineering to ensure scalability, efficiency, and reliability. It is divided into three distinct parts for better understanding and modularity:
+
+1. Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company
+2. Data Transfer from S3 to Snowflake for a Food Delivery Company
+3. Performing ETL process in snowflake and generate star schema model
+
+## Project Part 1: Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company
 
 ### Overview
 This project automates the transfer of operational data from an Amazon RDS MySQL database to an S3 bucket for a food delivery company. The `RDStoS3function` Lambda function extracts data incrementally from tables such as `location` and `customer`, processes it, and saves it as CSV files in S3. This pipeline ensures that data analysts have access to fresh data every 4 hours for monitoring business performance, such as customer growth and location-based trends. This is the first part of a larger end-to-end data engineering project that includes loading data into Snowflake and performing ETL transformations.
@@ -119,10 +126,104 @@ save_last_extract_timestamp(s3_client, str(latest_timestamp), table)
 
 ### Skills
 - **Programming**: Python
-- **Cloud**: AWS (Lambda, RDS, S3, Systems Manager, CloudWatch Logs, IAM)
+- **Cloud**: AWS (Lambda, EvenTBridge, RDS, S3, Systems Manager, CloudWatch Logs, IAM)
 - **Data Pipelines**: Incremental data extraction, data transfer
 
 ### Contact
 - **Email**: [your-email@example.com]
 - **GitHub**: [your-github-profile]
   
+## Project Part 2: Data Transfer from S3 to Snowflake for a Food Delivery Company
+
+### Overview
+This project automates the transfer of operational data from an S3 bucket to Snowflake for a food delivery company. CSV files (e.g., `location_data_*.csv`, `customer_data_*.csv`) generated in the previous step (RDS to S3) are ingested into corresponding tables in Snowflake (e.g., `location` and `customer`) using Snowflake’s `COPY INTO` command and Snowpipe for automated ingestion. This enables data analysts to perform advanced analytics on the food delivery company’s data, such as customer behavior and location-based trends, using Snowflake’s data warehousing capabilities. This is the second part of a larger end-to-end data engineering project that includes extracting data from RDS to S3 and performing ETL transformations in Snowflake.
+
+### Technologies Used
+- **AWS Services**: S3, SQS (for event notifications), IAM
+- **Snowflake**: Snowflake Data Cloud (for data warehousing), `COPY INTO` command, Snowpipe (for automated ingestion), Storage Integration
+- **IAM**: Configured roles for Snowflake to access S3
+
+### Architecture
+The architecture leverages Snowflake’s Snowpipe for automated data ingestion. An S3 bucket (`test.complete.food-delivery`) stores CSV files generated from the RDS to S3 pipeline. An S3 event notification (using SQS) is triggered whenever a new file is added to the bucket. Snowpipe detects the event via the SQS queue and automatically ingests the new CSV files into Snowflake tables (e.g., `location`) using a predefined pipe (`rds_to_s3_snowpipe`). Snowflake accesses the S3 bucket through an external stage (`rds_to_s3_stage`) and a storage integration (`rds_to_s3_int`) with the appropriate IAM role (`SnowflakeToS3role`).
+
+![Architecture Diagram](architecture-s3-to-snowflake.png)
+
+### Key Features
+- Automated data ingestion from S3 to Snowflake using Snowpipe, triggered by S3 event notifications.
+- Secure access to S3 using a Snowflake storage integration and IAM role.
+- Support for incremental data loading by processing only new CSV files in S3.
+- Metadata tracking in Snowflake tables (e.g., file name, load timestamp) for auditing and debugging.
+
+### Challenges Faced
+- **Challenge 1**: Connecting Snowflake to S3 and setting up the storage integration.
+  - **Solution**: Created a storage integration (`rds_to_s3_int`) in Snowflake with the correct IAM role (`SnowflakeToS3role`) and updated the role’s trust policy to allow Snowflake to assume it. Used the `DESC INTEGRATION` command to verify the setup and ensure the correct ARN was applied.
+- **Challenge 2**: Configuring the complete architecture for automated ingestion, including S3 event notifications and Snowpipe.
+  - **Solution**: Set up an S3 event notification with an SQS queue to trigger Snowpipe whenever new files are added to the bucket. Used the `SHOW PIPES` command to retrieve the `notification_channel` (SQS ARN) and configured the S3 event notification to send events to this queue.
+
+### Code Snippet
+The following Snowflake SQL commands set up the storage integration, stage, and Snowpipe for automated ingestion of CSV files from S3 into the `location` table:
+
+```sql
+-- Create a storage integration to connect Snowflake to S3
+CREATE OR REPLACE STORAGE INTEGRATION rds_to_s3_int
+    TYPE = EXTERNAL_STAGE
+    STORAGE_PROVIDER = S3
+    ENABLED = TRUE
+    STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/RDStoS3role'
+    STORAGE_ALLOWED_LOCATIONS = ('s3://test.complete.food-delivery/');
+
+-- Describe the integration to verify setup
+DESC INTEGRATION rds_to_s3_int;
+
+-- Update the storage integration with the correct IAM role
+ALTER STORAGE INTEGRATION rds_to_s3_int
+SET STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/SnowflakeToS3role';
+
+-- Create an external stage to access the S3 bucket
+CREATE OR REPLACE STAGE rds_to_s3_stage
+    URL = 's3://test.complete.food-delivery/'
+    STORAGE_INTEGRATION = rds_to_s3_int
+    FILE_FORMAT = ff_csv;
+
+-- Create a Snowpipe for automated ingestion into the location table
+CREATE OR REPLACE PIPE rds_to_s3_snowpipe
+    AUTO_INGEST = TRUE
+    AS
+    COPY INTO location
+    FROM (
+        SELECT
+            t.$1::text AS locationid,
+            t.$2::text AS city,
+            t.$3::text AS state,
+            t.$4::text AS zipcode,
+            t.$5::text AS activeflag,
+            t.$6::text AS createddate,
+            t.$7::text AS modifieddate,
+            metadata$filename AS _stg_file_name,
+            metadata$file_last_modified AS _stg_file_load_ts,
+            metadata$file_content_key AS _stg_file_md5,
+            current_timestamp AS _copy_data_ts
+        FROM @rds_to_s3_stage/location/csv t
+    )
+    FILE_FORMAT = (format_name = ff_csv);
+
+-- Retrieve the notification channel (SQS ARN) for Snowpipe
+SHOW PIPES;
+```
+-- Note: An S3 event notification (snowpipe-event) was created in AWS to trigger Snowpipe via the SQS queue (using the notification_channel ARN).
+
+### Results and Impact
+- Successfully automated the ingestion of operational data from S3 into Snowflake, enabling real-time analytics for a food delivery company.
+- Ingested CSV files (e.g., `location_data_*.csv`, `customer_data_*.csv`) into Snowflake tables (`location`, `customer`) whenever new files are added to S3.
+- Enabled data analysts to query the `location` and `customer` tables in Snowflake for insights into customer behavior and location-based trends.
+- Reduced latency between data availability in S3 and Snowflake by using Snowpipe for near-real-time ingestion.
+
+### Future Improvements
+- Implement error handling and retry mechanisms in Snowpipe to manage failed loads (e.g., due to malformed CSV files).
+- Add data validation in Snowflake to ensure data quality after ingestion (e.g., check for duplicates or missing values).
+- Use Snowflake’s task and notification features to monitor Snowpipe performance and alert on failures.
+
+### Skills
+- **Programming**: Python, SQL
+- **Cloud**: AWS (Lambda, RDS, S3, Systems Manager, Amazon EventBridge, CloudWatch Logs, SQS, IAM), Snowflake (Snowpipe, Storage Integration)
+- **Data Pipelines**: Incremental data extraction, automated data ingestion, data transfer
