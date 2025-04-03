@@ -204,7 +204,7 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
 -- Note: An S3 event notification (snowpipe-event) was created in AWS to trigger Snowpipe via the SQS queue (using the notification_channel ARN).
 
 ### SQL code : 
-- Find the complete snowflake SQL code here: [snowflake_staging_script.sql](/snowflake_staging_script/location.sql)
+- Find the complete snowflake SQL code here: [snowflake_staging_script.sql](/resources/snowflake_staging_script/location.sql)
 
   *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder call sql_initial_scripts)*
 
