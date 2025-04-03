@@ -2,7 +2,7 @@
 
 ## Description
 
-This project implements an end-to-end data engineering pipeline for a food delivery company, automating the flow of operational data from a relational database management system (RDBMS) to a data warehouse for advanced analytics. The pipeline extracts data from an Amazon RDS MySQL database, transfers it to an AWS S3 bucket, loads it into Snowflake (a cloud-based data warehouse), and performs ETL (Extract, Transform, Load) processes within Snowflake to create a star schema model. The final output is a structured dataset ready for business intelligence and analytical reporting, enabling data analysts to derive insights into customer behavior, delivery trends, and operational performance.
+This project implements an end-to-end **data engineering pipeline** for a food delivery company, automating the flow of operational data from a relational database management system (RDBMS) to a data warehouse for advanced analytics. The pipeline extracts data from an **Amazon RDS** MySQL database, transfers it to an **AWS S3** bucket, loads it into **Snowflake** (a cloud-based data warehouse), and performs **ETL** (Extract, Transform, Load) processes within Snowflake to create a star schema model. The final output is a structured dataset ready for business intelligence and analytical reporting, enabling data analysts to derive insights into customer behavior, delivery trends, and operational performance.
 
 The project leverages modern cloud technologies and best practices in data engineering to ensure scalability, efficiency, and reliability. It is divided into three distinct parts for better understanding and modularity:
 
