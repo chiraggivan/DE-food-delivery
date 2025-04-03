@@ -146,7 +146,7 @@ This project automates the transfer of operational data from an S3 bucket to Sno
 ### Architecture
 The architecture leverages Snowflake’s Snowpipe for automated data ingestion. An S3 bucket (`test.complete.food-delivery`) stores CSV files generated from the RDS to S3 pipeline. An S3 event notification (using SQS) is triggered whenever a new file is added to the bucket. Snowpipe detects the event via the SQS queue and automatically ingests the new CSV files into Snowflake tables (e.g., `location`) using a predefined pipe (`rds_to_s3_snowpipe`). Snowflake accesses the S3 bucket through an external stage (`rds_to_s3_stage`) and a storage integration (`rds_to_s3_int`) with the appropriate IAM role (`SnowflakeToS3role`).
 
-![Architecture Diagram](architecture-s3-to-snowflak.png)
+![Architecture Diagram](architecture-s3-to-snowflake.png)
 
 ### Key Features
 - Automated data ingestion from S3 to Snowflake using Snowpipe, triggered by S3 event notifications.
