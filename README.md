@@ -7,8 +7,8 @@ This project implements an end-to-end **data engineering pipeline** for a food d
 The project leverages modern cloud technologies and best practices in data engineering to ensure scalability, efficiency, and reliability. It is divided into three distinct parts for better understanding and modularity:
 
 1. Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company
-2. Data Transfer from S3 to Snowflake for a Food Delivery Company
-3. Performing ETL process in snowflake and generate star schema model
+2. Notification for Data Transfer from S3 to Snowflake for a Food Delivery Company
+3. Tasks and Procedures to perform ETL process in snowflake and generate star schema model
 
 ## Project Part 1: Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company
 
