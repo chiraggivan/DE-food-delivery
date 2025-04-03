@@ -54,7 +54,7 @@ The `RDStoS3function` Lambda function is triggered on a schedule (every 4 hours)
 ### Data Model
 - **ERD**: The Entity-Relationship Diagram (ERD) below illustrates the structure of the tables in the RDS database.
 
-![Diagram: ERD showcasing relationships between different tables](data-model-rds.png)
+![Diagram: ERD showcasing relationships between different tables](/resources/data-model-rds.png)
 
 ### Challenges Faced
 - **Challenge 1**: Ensuring secure access to RDS credentials without hardcoding them in the Lambda function.
