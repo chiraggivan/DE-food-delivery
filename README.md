@@ -16,7 +16,7 @@ The project leverages modern cloud technologies and best practices in data engin
 This project automates the transfer of operational data from an Amazon RDS MySQL database to an S3 bucket for a food delivery company. The `RDStoS3function` Lambda function extracts data incrementally from tables such as `location` and `customer`, processes it, and saves it as CSV files in S3. This pipeline ensures that data analysts have access to fresh data every 4 hours for monitoring business performance, such as customer growth and location-based trends. This is the first part of a larger end-to-end data engineering project that includes loading data into Snowflake and performing ETL transformations.
 
 ### Technologies Used
-- **AWS Services**: AWS Lambda, Amazon RDS (MySQL), S3, Systems Manager (SSM), CloudWatch Logs (for logging)
+- **AWS Services**: AWS Lambda, EventBridge, Amazon RDS (MySQL), S3, Systems Manager (SSM), CloudWatch Logs (for logging)
 - **Programming Language**: Python 3.11
 - **Libraries**: `mysql.connector`, `pandas`, `boto3`, `logging`
 - **IAM**: Configured roles and policies for Lambda to access RDS, S3, and SSM
