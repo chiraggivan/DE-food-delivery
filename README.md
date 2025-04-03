@@ -31,13 +31,13 @@ The `RDStoS3function` Lambda function is triggered on a schedule (every 4 hours)
 - **Tables**: The dataset includes 9 tables: `location`,`customer`,`restaurant`,`delivery_agent`, `customer_address`,`menu`,`orders`,`order_item` and `delivery`, which were created in RDS for testing purposes.
   - `location`: Contains information about delivery locations, such as `location_id`, `city`, `state`, `createdDate`, and `modifiedDate`.
   - `customer`: Contains customer information, such as `customer_id`, `name`, `email`, `createdDate`, and `modifiedDate`.
-  - `restaurant`: Contains restaurant information, such as `restaurant_id`,
-  - `delivery_agent`: Contains delivery agent information, such as `delivery_agent_id`,
-  - `customer_address`: Contains customer address information, such as `customer_address_id`,
-  - `menu`: Contains menu information, such as `menu_id`,
-  - `orders`: Contains orders information, such as `orders_id`,
-  - `order_item`: Contains order items information, such as `order_item_id`,
-  - `delivery`: Contains delivery information, such as `delivery_id`,
+  - `restaurant`: Contains restaurant information, such as `restaurant_id`, ``, `name`, `cuisine_type`, `pricing_for_two`, `open_status`
+  - `delivery_agent`: Contains delivery agent information, such as `delivery_agent_id`,`name`, `phone`, `vehicle_type`, `rating`
+  - `customer_address`: Contains customer address information, such as `customer_address_id`,`customer_id`, `location_id`, `address_line`
+  - `menu`: Contains menu information, such as `menu_id`,`restaurant_id`, `item_name`, `description`, `price`, `category`
+  - `orders`: Contains orders information, such as `orders_id`, `customer_id`, `restaurant_id`, `order_date`, `total_amount`, `payment_method`
+  - `order_item`: Contains order items information, such as `order_item_id`, `order_id`, `menu_id`, `quantity`, `price`, `sub_total`
+  - `delivery`: Contains delivery information, such as `delivery_id`, `order_id`, `delivery_agent_id`, `delivery_status`, `est_time`
 - **Data Type**: Synthetic data was used to test the system. For initial testing, a small dataset ranging from 5 to 35 rows per table was inserted, depending on the table and its business requirements.
 - **Testing Process**: Additional rows were later inserted, and existing rows were updated to simulate real-world data changes. This ensured that the system could handle both inserts and updates, with each change recorded in a new CSV file for downstream consumption.
 - **Format**: The data is extracted from RDS as a result of SQL queries, converted to CSV files using Pandas, and uploaded to S3 with a folder structure: `{table}/csv/` (e.g., `location/csv/location_data_20250402_120000.csv`).
