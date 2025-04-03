@@ -25,7 +25,7 @@ This project automates the transfer of operational data from an Amazon RDS MySQL
 The `RDStoS3function` Lambda function is triggered on a schedule (every 4 hours) via Amazon EventBridge. It retrieves RDS credentials securely from AWS Systems Manager Parameter Store, connects to an Amazon RDS MySQL database (`food_test_db`), and extracts data incrementally from tables like `location` and `customer` using SQL queries. The data is processed into CSV files using Pandas and uploaded to an S3 bucket (`test.complete.food-delivery`) under a folder structure like `{table}/csv/`. The last extracted timestamp is stored in S3 (e.g., `location/csv/last_extract.txt`) to enable incremental updates. The function logs its activity to CloudWatch Logs for monitoring and debugging.
 
 ### Architecture Diagram
-![Diagram: Amazon EventBridge → RDStoS3function → System Manager → Amazon RDS → S3 → CloudWatch Logs](architecture-rds-to-s3.png)  
+![Diagram: Amazon EventBridge → RDStoS3function → System Manager → Amazon RDS → S3 → CloudWatch Logs](/resources/architecture-rds-to-s3.png)  
 
 ### Key Features
 - Secure retrieval of RDS credentials using AWS Systems Manager Parameter Store.
@@ -144,7 +144,7 @@ This project automates the transfer of operational data from an S3 bucket to Sno
 ### Architecture
 The architecture leverages Snowflake’s Snowpipe for automated data ingestion. An S3 bucket (`test.complete.food-delivery`) stores CSV files generated from the RDS to S3 pipeline. An S3 event notification (using SQS) is triggered whenever a new file is added to the bucket. Snowpipe detects the event via the SQS queue and automatically ingests the new CSV files into Snowflake tables (e.g., `location`) using a predefined pipe (`rds_to_s3_snowpipe`). Snowflake accesses the S3 bucket through an external stage (`rds_to_s3_stage`) and a storage integration (`rds_to_s3_int`) with the appropriate IAM role (`SnowflakeToS3role`).
 
-![Architecture Diagram](architecture-s3-to-snowflake.png)
+![Architecture Diagram](/resources/architecture-s3-to-snowflake.png)
 
 ### Key Features
 - Automated data ingestion from S3 to Snowflake using Snowpipe, triggered by S3 event notifications.
