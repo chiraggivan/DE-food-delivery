@@ -59,11 +59,9 @@ The `RDStoS3function` Lambda function is triggered on a schedule (every 4 hours)
 ### Challenges Faced
 - **Challenge 1**: Ensuring secure access to RDS credentials without hardcoding them in the Lambda function.
   - **Solution**: Used AWS Systems Manager Parameter Store to securely store and retrieve the RDS username and password.
-- **Challenge 2**: Handling incremental updates to avoid reprocessing the entire dataset, which could lead to performance issues.
-  - **Solution**: Implemented a timestamp-based incremental extraction mechanism by storing the last extracted timestamp in S3 and using it in SQL queries.
-- **Challenge 3**: Initially struggled with configuring the Lambda function to interact with multiple AWS services, such as retrieving credentials from Systems Manager Parameter Store and ensuring proper permissions to read/write to S3.
+- **Challenge 2**: Initially struggled with configuring the Lambda function to interact with multiple AWS services, such as retrieving credentials from Systems Manager Parameter Store and ensuring proper permissions to read/write to S3.
   - **Solution**: Configured the Lambda function’s IAM role with the necessary permissions (e.g., `ssm:GetParameter` for Systems Manager and `s3:GetObject`/`s3:PutObject` for S3) and tested the function with sample data to ensure proper connectivity.
-- **Challenge 4**: Faced difficulties in implementing incremental data extraction to avoid reprocessing the entire dataset, which could lead to performance issues and increased costs.
+- **Challenge 3**: Faced difficulties in implementing incremental data extraction to avoid reprocessing the entire dataset, which could lead to performance issues and increased costs.
   - **Solution**: Designed a timestamp-based mechanism by storing the last extracted timestamp in S3 (e.g., `location/csv/last_extract.txt`) and using it in SQL queries to extract only new or updated records. Added error handling for cases where the timestamp file was missing.
 
 ### Code Snippet
@@ -206,7 +204,7 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
 ### SQL code : 
 - Find the complete snowflake SQL code here: [snowflake_staging_script.sql](/resources/snowflake_staging_script/location.sql)
 
-  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder call sql_initial_scripts)*
+  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder called sql_initial_scripts)*
 
 ### Results and Impact
 - Successfully automated the ingestion of operational data from S3 into Snowflake, enabling real-time analytics for a food delivery company.
