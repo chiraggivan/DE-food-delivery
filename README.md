@@ -136,7 +136,7 @@ save_last_extract_timestamp(s3_client, str(latest_timestamp), table)
 ## Project Part 2: Data Transfer from S3 to Snowflake for a Food Delivery Company
 
 ### Overview
-This project automates the transfer of operational data from an S3 bucket to Snowflake for a food delivery company. CSV files (e.g., `location_data_*.csv`, `customer_data_*.csv`) generated in the previous step (RDS to S3) are ingested into corresponding tables in Snowflake (e.g., `location` and `customer`) using Snowflake’s `COPY INTO` command and Snowpipe for automated ingestion. This enables data analysts to perform advanced analytics on the food delivery company’s data, such as customer behavior and location-based trends, using Snowflake’s data warehousing capabilities. This is the second part of a larger end-to-end data engineering project that includes extracting data from RDS to S3 and performing ETL transformations in Snowflake.
+This project automates the transfer of operational data from an S3 bucket to Snowflake for a food delivery company. CSV files (e.g., `location_data_*.csv`, `customer_data_*.csv`) generated in the previous step (RDS to S3) are ingested into corresponding tables in Snowflake (like `location` and `customer`) using Snowflake’s `COPY INTO` command and Snowpipe for automated ingestion. This enables data analysts to perform advanced analytics on the food delivery company’s data, such as customer behavior and location-based trends, using Snowflake’s data warehousing capabilities. This is the second part of a larger end-to-end data engineering project that includes extracting data from RDS to S3 and performing ETL transformations in Snowflake.
 
 ### Technologies Used
 - **AWS Services**: S3, SQS (for event notifications), IAM
@@ -172,13 +172,6 @@ CREATE OR REPLACE STORAGE INTEGRATION rds_to_s3_int
     STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/RDStoS3role'
     STORAGE_ALLOWED_LOCATIONS = ('s3://test.complete.food-delivery/');
 
--- Describe the integration to verify setup
-DESC INTEGRATION rds_to_s3_int;
-
--- Update the storage integration with the correct IAM role
-ALTER STORAGE INTEGRATION rds_to_s3_int
-SET STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/SnowflakeToS3role';
-
 -- Create an external stage to access the S3 bucket
 CREATE OR REPLACE STAGE rds_to_s3_stage
     URL = 's3://test.complete.food-delivery/'
@@ -207,10 +200,13 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
     )
     FILE_FORMAT = (format_name = ff_csv);
 
--- Retrieve the notification channel (SQS ARN) for Snowpipe
-SHOW PIPES;
 ```
 -- Note: An S3 event notification (snowpipe-event) was created in AWS to trigger Snowpipe via the SQS queue (using the notification_channel ARN).
+
+### SQL code : 
+- Find the complete snowflake SQL code here: [snowflake_staging_script.sql](/snowflake_staging_script/location.sql)
+
+  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder call sql_initial_scripts)*
 
 ### Results and Impact
 - Successfully automated the ingestion of operational data from S3 into Snowflake, enabling real-time analytics for a food delivery company.
