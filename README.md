@@ -110,7 +110,7 @@ save_last_extract_timestamp(s3_client, str(latest_timestamp), table)
                     
 ```
 ### Python code : 
-- Find the complete python code here: [rds-to-s3.py](rds_to_s3.py)
+- Find the complete python code here: [rds-to-s3.py]()
 
 ### Results and Impact
 - Successfully automated the transfer of operational data (e.g., `location` and `customer` tables) from Amazon RDS to S3, enabling downstream analysis for a food delivery company.
