@@ -131,7 +131,7 @@ save_last_extract_timestamp(s3_client, str(latest_timestamp), table)
 
 ### Contact
 - **Email**: [your-email@example.com]
-- **GitHub**: [your-github-profile]
+- **Portfolio**: [Chirag Givan](https://chiraggivan.github.io/DataAnalyst/)
   
 ## Project Part 2: Data Transfer from S3 to Snowflake for a Food Delivery Company
 
