@@ -223,3 +223,118 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
 - **Programming**: Python, SQL
 - **Cloud**: AWS (Lambda, RDS, S3, Systems Manager, Amazon EventBridge, CloudWatch Logs, SQS, IAM), Snowflake (Snowpipe, Storage Integration)
 - **Data Pipelines**: Incremental data extraction, automated data ingestion, data transfer
+
+
+## Part 3: Performing ETL Process in Snowflake and Generating a Star Schema Model
+
+### Overview
+This project focuses on transforming raw data in Snowflake and organizing it into a star schema model for a food delivery company. The raw data, loaded into the stage schema in Snowflake (from Part 2), undergoes a multi-step ETL (Extract, Transform, Load) process across three schemas: stage, clean, and consumption. The pipeline processes 9 tables, including 3 transactional tables (`orders`, `order_item`, `delivery`) and 6 non-transactional tables (e.g., `location`, `customer`). The non-transactional tables are transformed into dimension tables in the consumption schema using Slowly Changing Dimension Type 2 (SCD2) to capture historical changes. The transactional tables are merged into a single fact table (`fact_order_items`) at the granularity of `order_item`. A `dim_date` table is added to support time-based analysis. The ETL process is automated using Snowflake streams, tasks, and stored procedures, ensuring data is transformed and loaded efficiently. This star schema model enables data analysts to generate insights into key business metrics, such as delivery times, customer retention, and regional performance trends.
+
+### Technologies Used
+- **Snowflake**: Snowflake Data Cloud (for data warehousing, ETL, and star schema modeling), Streams (for change data capture), Tasks (for scheduling), Stored Procedures (for data merging)
+- **SQL**: Used for writing ETL scripts, stored procedures, and creating the star schema
+
+### Architecture
+
+The ETL process is automated using Snowflake streams, tasks, and stored procedures:
+1. A stream in the stage schema (e.g., on the `location` table) captures changes (inserts, updates, deletes).
+2. A task triggers a stored procedure when the stream has data, merging the changes into the clean schema with transformations (e.g., casting data types, adding business logic columns).
+3. A stream in the clean schema captures changes, and a second task triggers another stored procedure to load data into the consumption schema (dimension tables for non-transactional tables, fact table for transactional tables).
+
+The star schema in the consumption schema enables efficient analytical queries for business intelligence and reporting.
+
+![Architecture Diagram](etl-snowflake-architecture.png)  
+*(Diagram to be created: Stage Schema (raw tables) → Streams → Clean Schema (transformed tables) → Streams → Consumption Schema (dim tables, fact table))*
+
+### Data Used
+- **Source**: Snowflake stage schema tables (`location`, `customer`, `orders`, `order_item`, `delivery`, and 4 others), loaded from S3 in Part 2.
+- **Tables**:
+  - Non-transactional: `location` (e.g., `location_id`, `city`, `state`, `createdDate`, `modifiedDate`), `customer` (e.g., `customer_id`, `name`, `email`, `createdDate`, `modifiedDate`), and 4 others.
+  - Transactional: `orders` (e.g., `order_id`, `customer_id`, `location_id`, `order_date`), `order_item` (e.g., `order_item_id`, `order_id`, `item_name`, `quantity`, `total_amount`), `delivery` (e.g., `delivery_id`, `order_id`, `delivery_time`).
+- **Data Type**: Synthetic data, as generated in Part 1.
+- **Volume**: Approximately 5–35 rows per table during testing.
+- **Frequency**: The ETL process runs whenever there is data in the streams, triggered by Snowpipe loads every 4 hours (from Part 2).
+
+### ETL Process
+The ETL process involves the following steps across the three schemas:
+
+1. **Stage to Clean**:
+   - Streams in the stage schema (e.g., `location_stream`) capture changes in the raw tables.
+   - A task triggers a stored procedure to merge the stream data into the clean schema.
+   - Transformations include:
+     - Casting data to proper data types (e.g., `location_id` as `INT`, `city` as `VARCHAR`).
+     - Adding a surrogate key using a Snowflake sequence.
+     - Adding business logic columns:
+       - `is_city_capital`: A flag (TRUE/FALSE) if the city is a state capital (based on a predefined list).
+       - `tier`: Classifies cities as Tier 1, Tier 2, or Tier 3 (default to Tier 3 if not in Tier 1 or 2).
+       - `state_code`: A predefined code for each state.
+       - `is_union_territory`: A flag (TRUE/FALSE) if the state is a union territory.
+     - Implementing SCD2 to capture historical changes (e.g., for the `location` table).
+
+2. **Clean to Consumption**:
+   - Streams in the clean schema (e.g., `clean_location_stream`) capture changes.
+   - A second task triggers another stored procedure to load data into the consumption schema.
+   - For the 6 non-transactional tables:
+     - Data is loaded into dimension tables (e.g., `dim_location`, `dim_customer`).
+     - Dimension tables include SCD2 columns: `tablename_hk` (hash key), `eff_start_dt`, `eff_end_dt`, `current_flag`.
+   - For the 3 transactional tables:
+     - Data is merged into a single fact table (`fact_order_items`) at the granularity of `order_item`.
+
+
+
+### Key Features
+- **SCD2 Implementation**: Captures historical changes in dimension tables using `eff_start_dt`, `eff_end_dt`, and `current_flag`.
+- **Business Logic**: Adds columns like `is_city_capital`, `tier`, `state_code`, and `is_union_territory` to enrich the data.
+- **Automated ETL**: Uses Snowflake streams, tasks, and stored procedures to automate the data pipeline from stage to consumption schema.
+- **Star Schema**: Optimizes the data for analytical queries with a fact table at the `order_item` granularity and dimension tables for non-transactional data.
+
+### Challenges Faced
+- **Challenge 1**: Implementing SCD2 logic to capture historical changes in the dimension tables.
+  - **Solution**: Used streams to capture changes and stored procedures to merge data into the clean and consumption schemas, maintaining `eff_start_dt`, `eff_end_dt`, and `current_flag` for SCD2.
+- **Challenge 2**: Ensuring data type consistency when casting data from stage to clean schema.
+  - **Solution**: Explicitly cast columns to the correct data types in the stored procedures (e.g., `CAST(city AS VARCHAR)`).
+- **Challenge 3**: Managing dependencies between tasks and streams for the ETL pipeline.
+  - **Solution**: Configured tasks to run only when streams contain data, using Snowflake’s `SYSTEM$STREAM_HAS_DATA` function to check for changes.
+
+### Code Snippet
+```sql
+
+-- Create a stored procedure to merge data from stage to clean schema
+CREATE OR REPLACE PROCEDURE stage.merge_location_to_clean()
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$  
+BEGIN
+    
+  $$;
+
+-- Create a task to run the stored procedure when the stream has data
+CREATE OR REPLACE TASK stage.merge_location_task
+  WAREHOUSE = 'COMPUTE_WH'
+  SCHEDULE = '1 MINUTE'
+  WHEN SYSTEM$STREAM_HAS_DATA('stage.location_stream')
+AS
+  CALL stage.merge_location_to_clean();
+
+-- Create the fact_order_items table
+CREATE OR REPLACE TABLE consumption.fact_order_items (
+    order_item_id INT,
+    order_id INT,
+    delivery_id INT,
+    location_hk VARCHAR,
+    customer_hk VARCHAR,
+    date_key INT,
+    quantity INT,
+    total_amount DECIMAL(10, 2),
+    delivery_time INT
+);
+
+-- Create a task to run the fact table merge
+CREATE OR REPLACE TASK clean.merge_transactional_to_fact_task
+  WAREHOUSE = 'COMPUTE_WH'
+  SCHEDULE = '1 MINUTE'
+  WHEN SYSTEM$STREAM_HAS_DATA('clean.clean_order_item_stream')
+AS
+  CALL clean.merge_transactional_to_fact();
+
