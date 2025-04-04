@@ -135,10 +135,11 @@ save_last_extract_timestamp(s3_client, str(latest_timestamp), table)
 ### Contact
 - **Email**: [your-email@example.com]
 - **Portfolio**: [Chirag Givan](https://chiraggivan.github.io/DataAnalyst/)
-  
-## Project Part 2: Data Transfer from S3 to Snowflake for a Food Delivery Company
-<a name="part-2-data-transfer-from-s3-to-snowflake"></a>
 
+<a name="part-2-data-transfer-from-s3-to-snowflake"></a>
+## Project Part 2: Data Transfer from S3 to Snowflake for a Food Delivery Company
+
+### [Table of content](#project-end-to-end-data-engineering-project-for-a-food-delivery-company)
 ### Overview
 This project automates the transfer of operational data from an S3 bucket to Snowflake for a food delivery company. CSV files (e.g., `location_data_*.csv`, `customer_data_*.csv`) generated in the previous step (RDS to S3) are ingested into corresponding tables in Snowflake (like `location` and `customer`) using Snowflake’s `COPY INTO` command and Snowpipe for automated ingestion. This enables data analysts to perform advanced analytics on the food delivery company’s data, such as customer behavior and location-based trends, using Snowflake’s data warehousing capabilities. This is the second part of a larger end-to-end data engineering project that includes extracting data from RDS to S3 and performing ETL transformations in Snowflake.
 
@@ -230,10 +231,10 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
 - **Cloud**: AWS (Lambda, RDS, S3, Systems Manager, Amazon EventBridge, CloudWatch Logs, SQS, IAM), Snowflake (Snowpipe, Storage Integration)
 - **Data Pipelines**: Incremental data extraction, automated data ingestion, data transfer
 
-
-## Part 3: Performing ETL Process in Snowflake and Generating a Star Schema Model
 <a name="part-3-performing-etl-process-in-snowflake-and-generating-a-star-schema-model"></a>
+## Part 3: Performing ETL Process in Snowflake and Generating a Star Schema Model
 
+### [Table of content](#project-end-to-end-data-engineering-project-for-a-food-delivery-company)
 ### Overview
 This project focuses on transforming raw data in Snowflake and organizing it into a star schema model for a food delivery company. The raw data, loaded into the stage schema in Snowflake (from Part 2), undergoes a multi-step ETL (Extract, Transform, Load) process across three schemas: stage, clean, and consumption. The pipeline processes 9 tables, including 3 transactional tables (`orders`, `order_item`, `delivery`) and 6 non-transactional tables (e.g., `location`, `customer`). The non-transactional tables are transformed into dimension tables in the consumption schema using Slowly Changing Dimension Type 2 (SCD2) to capture historical changes. The transactional tables are merged into a single fact table (`fact_order_items`) at the granularity of `order_item`. A `dim_date` table is added to support time-based analysis. The ETL process is automated using Snowflake streams, tasks, and stored procedures, ensuring data is transformed and loaded efficiently. This star schema model enables data analysts to generate insights into key business metrics, such as delivery times, customer retention, and regional performance trends.
 
