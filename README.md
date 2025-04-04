@@ -6,11 +6,14 @@ This project implements an end-to-end **data engineering pipeline** for a food d
 
 The project leverages modern cloud technologies and best practices in data engineering to ensure scalability, efficiency, and reliability. It is divided into three distinct parts for better understanding and modularity:
 
-1. Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company
-2. Notification for Data Transfer from S3 to Snowflake for a Food Delivery Company
-3. Tasks and Procedures to perform ETL process in snowflake and generate star schema model
+## Table of Contents
+- [Project: End-to-End Data Engineering Project for a Food Delivery Company](#project-end-to-end-data-engineering-project-for-a-food-delivery-company)
+- [Part 1: Automated Data Transfer from Amazon RDS to S3](#part-1-automated-data-transfer-from-amazon-rds-to-s3)
+- [Part 2: Data Transfer from S3 to Snowflake](#part-2-data-transfer-from-s3-to-snowflake)
+- [Part 3: Performing ETL Process in Snowflake and Generating a Star Schema Model](#part-3-performing-etl-process-in-snowflake-and-generating-a-star-schema-model)
 
-## Project Part 1: Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company
+## Project Part 1: Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company 
+<a name="part-1-automated-data-transfer-from-amazon-rds-to-s3"></a>
 
 ### Overview
 This project automates the transfer of operational data from an Amazon RDS MySQL database to an S3 bucket for a food delivery company. The `RDStoS3function` Lambda function extracts data incrementally from tables such as `location` and `customer`, processes it, and saves it as CSV files in S3. This pipeline ensures that data analysts have access to fresh data every 4 hours for monitoring business performance, such as customer growth and location-based trends. This is the first part of a larger end-to-end data engineering project that includes loading data into Snowflake and performing ETL transformations.
@@ -132,6 +135,7 @@ save_last_extract_timestamp(s3_client, str(latest_timestamp), table)
 - **Portfolio**: [Chirag Givan](https://chiraggivan.github.io/DataAnalyst/)
   
 ## Project Part 2: Data Transfer from S3 to Snowflake for a Food Delivery Company
+<a name="part-2-data-transfer-from-s3-to-snowflake"></a>
 
 ### Overview
 This project automates the transfer of operational data from an S3 bucket to Snowflake for a food delivery company. CSV files (e.g., `location_data_*.csv`, `customer_data_*.csv`) generated in the previous step (RDS to S3) are ingested into corresponding tables in Snowflake (like `location` and `customer`) using Snowflake’s `COPY INTO` command and Snowpipe for automated ingestion. This enables data analysts to perform advanced analytics on the food delivery company’s data, such as customer behavior and location-based trends, using Snowflake’s data warehousing capabilities. This is the second part of a larger end-to-end data engineering project that includes extracting data from RDS to S3 and performing ETL transformations in Snowflake.
@@ -226,6 +230,7 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
 
 
 ## Part 3: Performing ETL Process in Snowflake and Generating a Star Schema Model
+<a name="part-3-performing-etl-process-in-snowflake-and-generating-a-star-schema-model"></a>
 
 ### Overview
 This project focuses on transforming raw data in Snowflake and organizing it into a star schema model for a food delivery company. The raw data, loaded into the stage schema in Snowflake (from Part 2), undergoes a multi-step ETL (Extract, Transform, Load) process across three schemas: stage, clean, and consumption. The pipeline processes 9 tables, including 3 transactional tables (`orders`, `order_item`, `delivery`) and 6 non-transactional tables (e.g., `location`, `customer`). The non-transactional tables are transformed into dimension tables in the consumption schema using Slowly Changing Dimension Type 2 (SCD2) to capture historical changes. The transactional tables are merged into a single fact table (`fact_order_items`) at the granularity of `order_item`. A `dim_date` table is added to support time-based analysis. The ETL process is automated using Snowflake streams, tasks, and stored procedures, ensuring data is transformed and loaded efficiently. This star schema model enables data analysts to generate insights into key business metrics, such as delivery times, customer retention, and regional performance trends.
@@ -337,4 +342,23 @@ CREATE OR REPLACE TASK clean.merge_transactional_to_fact_task
   WHEN SYSTEM$STREAM_HAS_DATA('clean.clean_order_item_stream')
 AS
   CALL clean.merge_transactional_to_fact();
+```
 
+#### Results and Impact
+- **Focus on Value**: Highlighted how the star schema enables specific business insights (e.g., revenue by city tier, delivery trends), which aligns with the project’s goal of supporting analytics for a food delivery company.
+- **Performance Metrics**: Included query performance (under 5 seconds) to show the efficiency of the star schema, even with a small test dataset.
+- **Data Volume**: Kept the test data volume (5–35 rows per table) consistent with previous parts, with an estimated 20 rows in the fact table based on the `order_item` granularity.
+- **SCD2 Benefit**: Emphasized the value of SCD2 for historical analysis, which adds depth to the analytics capabilities.
+- **Business Impact**: Noted how the pipeline enables actionable insights, such as optimizing delivery operations in specific regions.
+
+#### Future Improvements
+- **Practical Enhancements**: Suggested improvements that address real-world concerns, such as data quality, cost optimization, and scalability.
+- **Scalability**: Focused on adjustments for handling larger data volumes (e.g., optimizing task frequency, adding clustering keys).
+- **Error Handling**: Added a suggestion for error notifications to improve pipeline reliability.
+- **Additional Features**: Proposed adding more dimension tables to support deeper analysis, aligning with potential business needs.
+
+#### Skills
+- **Technical Skills**: Highlighted specific data engineering skills demonstrated in this part, such as data modeling, ETL development, and SQL proficiency.
+- **Snowflake Expertise**: Emphasized the use of Snowflake-specific features (streams, tasks, stored procedures) to showcase your familiarity with the platform.
+- **Business Acumen**: Included the application of business logic (e.g., city tiers, state codes) to show your ability to align technical work with business requirements.
+- **Automation**: Noted your ability to automate the ETL process, a key skill for modern data engineering.
