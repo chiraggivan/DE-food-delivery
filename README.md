@@ -6,15 +6,16 @@ This project implements an end-to-end **data engineering pipeline** for a food d
 
 The project leverages modern cloud technologies and best practices in data engineering to ensure scalability, efficiency, and reliability. It is divided into three distinct parts for better understanding and modularity:
 
+[](#project-end-to-end-data-engineering-project-for-a-food-delivery-company)
 ## Table of Contents
-- [Project: End-to-End Data Engineering Project for a Food Delivery Company](#project-end-to-end-data-engineering-project-for-a-food-delivery-company)
 - [Part 1: Automated Data Transfer from Amazon RDS to S3](#part-1-automated-data-transfer-from-amazon-rds-to-s3)
 - [Part 2: Data Transfer from S3 to Snowflake](#part-2-data-transfer-from-s3-to-snowflake)
 - [Part 3: Performing ETL Process in Snowflake and Generating a Star Schema Model](#part-3-performing-etl-process-in-snowflake-and-generating-a-star-schema-model)
 
 ## Project Part 1: Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company 
 <a name="part-1-automated-data-transfer-from-amazon-rds-to-s3"></a>
-
+### Table of content 
+<a name="project-end-to-end-data-engineering-project-for-a-food-delivery-company"></a>
 ### Overview
 This project automates the transfer of operational data from an Amazon RDS MySQL database to an S3 bucket for a food delivery company. The `RDStoS3function` Lambda function extracts data incrementally from tables such as `location` and `customer`, processes it, and saves it as CSV files in S3. This pipeline ensures that data analysts have access to fresh data every 4 hours for monitoring business performance, such as customer growth and location-based trends. This is the first part of a larger end-to-end data engineering project that includes loading data into Snowflake and performing ETL transformations.
 
