@@ -199,12 +199,14 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
     FILE_FORMAT = (format_name = ff_csv);
 
 ```
--- Note: An S3 event notification (snowpipe-event) was created in AWS to trigger Snowpipe via the SQS queue (using the notification_channel ARN).
+-- Note: 
+    -  An S3 event notification (snowpipe-event) was created in AWS to trigger Snowpipe via the SQS queue (using the notification_channel ARN).
+    -  Created event notifications for every snowpipe created. 
 
 ### SQL code : 
 - Find the complete snowflake SQL code here: [snowflake_staging_script.sql](/resources/snowflake_staging_script/location.sql)
 
-  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder called sql_initial_scripts)*
+  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder called snowflake_staging_script)*
 
 ### Results and Impact
 - Successfully automated the ingestion of operational data from S3 into Snowflake, enabling real-time analytics for a food delivery company.
