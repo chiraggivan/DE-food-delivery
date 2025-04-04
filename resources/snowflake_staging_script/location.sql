@@ -92,3 +92,7 @@ CREATE OR REPLACE PIPE pipe_s3_to_location
 
 -- Retrieve the notification channel (SQS ARN) for Snowpipe
 SHOW PIPES;
+
+
+--- we only need to create snowpipe for the rest of the table 
+--- all the sql script for snowpipe of other tables are in snowpipes.sql
