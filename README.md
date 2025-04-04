@@ -199,9 +199,9 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
     FILE_FORMAT = (format_name = ff_csv);
 
 ```
--- Note: 
-    -  An S3 event notification (snowpipe-event) was created in AWS to trigger Snowpipe via the SQS queue (using the notification_channel ARN).
-    -  Created event notifications for every snowpipe created. 
+**Note:** 
+-  An S3 event notification (snowpipe-event) was created in AWS to trigger Snowpipe via the SQS queue (using the notification_channel ARN).
+-  Created event notifications for every snowpipe created. 
 
 ### SQL code : 
 - Find the complete snowflake SQL code here: [snowflake_staging_script.sql](/resources/snowflake_staging_script/location.sql)
