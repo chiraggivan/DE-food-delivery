@@ -9,7 +9,7 @@ CREATE SCHEMA IF NOT EXISTS common;
 USE SCHEMA stage_sch;
 
 -- create file format to process the CSV file
-create file format if not exists stage_sch.csv_file_format 
+create file format if not exists stage_sch.ff_csv 
     type = 'csv' 
     compression = 'auto' 
     field_delimiter = ',' 
@@ -18,7 +18,7 @@ create file format if not exists stage_sch.csv_file_format
     field_optionally_enclosed_by = '\042' 
     null_if = ('\\N');
 
--- NOTE : the above code is only run once and not for any other tables
+---------------------- NOTE : the above codes is only run once and not for any other tables-------------
 
 -- create table in stage schema
 create or replace table stage_sch.location (
@@ -48,7 +48,7 @@ comment = 'this is the append-only stream object on location table that gets del
 ---------------------- BELOW SQL SCRIPT for connecting snowflake to s3 ----------------------------
 
 -- Create a storage integration to connect Snowflake to S3
-CREATE OR REPLACE STORAGE INTEGRATION rds_to_s3_int
+CREATE OR REPLACE STORAGE INTEGRATION si_s3_to_snowflake
     TYPE = EXTERNAL_STAGE
     STORAGE_PROVIDER = S3
     ENABLED = TRUE
@@ -56,20 +56,20 @@ CREATE OR REPLACE STORAGE INTEGRATION rds_to_s3_int
     STORAGE_ALLOWED_LOCATIONS = ('s3://test.complete.food-delivery/');
 
 -- Describe the integration to verify setup
-DESC INTEGRATION rds_to_s3_int;
+DESC INTEGRATION si_s3_to_snowflake;
 
 -- Update the storage integration with the correct IAM role
-ALTER STORAGE INTEGRATION rds_to_s3_int
+ALTER STORAGE INTEGRATION si_s3_to_snowflake
 SET STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/SnowflakeToS3role';
 
 -- Create an external stage to access the S3 bucket
-CREATE OR REPLACE STAGE rds_to_s3_stage
+CREATE OR REPLACE STAGE stg_s3_to_snowflake
     URL = 's3://test.complete.food-delivery/'
-    STORAGE_INTEGRATION = rds_to_s3_int
+    STORAGE_INTEGRATION = si_s3_to_snowflake
     FILE_FORMAT = ff_csv;
 
 -- Create a Snowpipe for automated ingestion into the location table
-CREATE OR REPLACE PIPE rds_to_s3_snowpipe
+CREATE OR REPLACE PIPE pipe_s3_to_location
     AUTO_INGEST = TRUE
     AS
     COPY INTO location
@@ -86,7 +86,7 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
             metadata$file_last_modified AS _stg_file_load_ts,
             metadata$file_content_key AS _stg_file_md5,
             current_timestamp AS _copy_data_ts
-        FROM @rds_to_s3_stage/location/csv t
+        FROM @stg_s3_to_snowflake/location/csv t
     )
     FILE_FORMAT = (format_name = ff_csv);
 
