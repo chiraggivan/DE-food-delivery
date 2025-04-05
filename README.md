@@ -17,7 +17,7 @@ The project leverages modern cloud technologies and best practices in data engin
 <a name="part-1-automated-data-transfer-from-amazon-rds-to-s3"></a>
 ## Project Part 1: Automated Data Transfer from Amazon RDS to S3 for a Food Delivery Company 
 
-### [Table of content](#project-end-to-end-data-engineering-project-for-a-food-delivery-company)
+### [Table of content](#table-of-contents)
 ### Overview
 This project automates the transfer of operational data from an Amazon RDS MySQL database to an S3 bucket for a food delivery company. The `RDStoS3function` Lambda function extracts data incrementally from tables such as `location` and `customer`, processes it, and saves it as CSV files in S3. This pipeline ensures that data analysts have access to fresh data every 4 hours for monitoring business performance, such as customer growth and location-based trends. This is the first part of a larger end-to-end data engineering project that includes loading data into Snowflake and performing ETL transformations.
 
