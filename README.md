@@ -28,7 +28,7 @@ This project automates the transfer of operational data from an Amazon RDS MySQL
 - **IAM**: Configured roles and policies for Lambda to access RDS, S3, and SSM
 
 ### Architecture
-The `RDStoS3function` Lambda function is triggered on a schedule (every 4 hours) via Amazon EventBridge. It retrieves RDS credentials securely from AWS Systems Manager Parameter Store, connects to an Amazon RDS MySQL database (`food_test_db`), and extracts data incrementally from tables like `location` and `customer` using SQL queries. The data is processed into CSV files using Pandas and uploaded to an S3 bucket (`test.complete.food-delivery`) under a folder structure like `{table}/csv/`. The last extracted timestamp is stored in S3 (e.g., `location/csv/last_extract.txt`) to enable incremental updates. The function logs its activity to CloudWatch Logs for monitoring and debugging.
+The `RDStoS3function` Lambda function is triggered on a schedule (every 4 hours) via Amazon EventBridge. It retrieves RDS credentials securely from AWS Systems Manager Parameter Store, connects to an Amazon RDS MySQL database (`db_food_delivery`), and extracts data incrementally from tables like `location` and `customer` using SQL queries. The data is processed into CSV files using Pandas and uploaded to an S3 bucket (`food-delivery-prod-rds-s3`) under a folder structure like `{table}/csv/`. The last extracted timestamp is stored in S3 (e.g., `location/csv/last_extract.txt`) to enable incremental updates. The function logs its activity to CloudWatch Logs for monitoring and debugging.
 
 ### Architecture Diagram
 ![Diagram: Amazon EventBridge → RDStoS3function → System Manager → Amazon RDS → S3 → CloudWatch Logs](/resources/architecture-rds-to-s3.png)  
@@ -40,7 +40,7 @@ The `RDStoS3function` Lambda function is triggered on a schedule (every 4 hours)
 - Comprehensive logging to CloudWatch Logs for monitoring and troubleshooting.
 
 ### Data Used
-- **Source**: Amazon RDS MySQL database (`food_test_db`).
+- **Source**: Amazon RDS MySQL database (`db_food_delivery`).
 - **Tables**: The dataset includes 9 tables: `location`,`customer`,`restaurant`,`delivery_agent`, `customer_address`,`menu`,`orders`,`order_item` and `delivery`, which were created in RDS for testing purposes.
   - `location`: Contains information about delivery locations, such as `location_id`, `city`, `state`, `createdDate`, and `modifiedDate`.
   - `customer`: Contains customer information, such as `customer_id`, `name`, `email`, `createdDate`, and `modifiedDate`.
@@ -150,7 +150,7 @@ This project automates the transfer of operational data from an S3 bucket to Sno
 - **IAM**: Configured roles for Snowflake to access S3
 
 ### Architecture
-The architecture leverages Snowflake’s Snowpipe for automated data ingestion. An S3 bucket (`test.complete.food-delivery`) stores CSV files generated from the RDS to S3 pipeline. An S3 event notification (using SQS) is triggered whenever a new file is added to the bucket. Snowpipe detects the event via the SQS queue and automatically ingests the new CSV files into Snowflake tables (e.g., `location`) using a predefined pipe (`rds_to_s3_snowpipe`). Snowflake accesses the S3 bucket through an external stage (`rds_to_s3_stage`) and a storage integration (`rds_to_s3_int`) with the appropriate IAM role (`SnowflakeToS3role`).
+The architecture leverages Snowflake’s Snowpipe for automated data ingestion. An S3 bucket (`food-delivery-prod-rds-s3`) stores CSV files generated from the RDS to S3 pipeline. An S3 event notification (using SQS) is triggered whenever a new file is added to the bucket. Snowpipe detects the event via the SQS queue and automatically ingests the new CSV files into Snowflake tables (e.g., `location`) using a predefined pipe (`pipe_s3_to_location`). Snowflake accesses the S3 bucket through an external stage (`stg_s3_to_snowflake`) and a storage integration (`si_s3_to_snowflake`) with the appropriate IAM role (`SnowflakeToS3role`).
 
 ![Architecture Diagram](/resources/architecture-s3-to-snowflake.png)
 
@@ -162,7 +162,7 @@ The architecture leverages Snowflake’s Snowpipe for automated data ingestion. 
 
 ### Challenges Faced
 - **Challenge 1**: Connecting Snowflake to S3 and setting up the storage integration.
-  - **Solution**: Created a storage integration (`rds_to_s3_int`) in Snowflake with the correct IAM role (`SnowflakeToS3role`) and updated the role’s trust policy to allow Snowflake to assume it. Used the `DESC INTEGRATION` command to verify the setup and ensure the correct ARN was applied.
+  - **Solution**: Created a storage integration (`si_s3_to_snowflake`) in Snowflake with the correct IAM role (`SnowflakeToS3role`) and updated the role’s trust policy to allow Snowflake to assume it. Used the `DESC INTEGRATION` command to verify the setup and ensure the correct ARN was applied.
 - **Challenge 2**: Configuring the complete architecture for automated ingestion, including S3 event notifications and Snowpipe.
   - **Solution**: Set up an S3 event notification with an SQS queue to trigger Snowpipe whenever new files are added to the bucket. Used the `SHOW PIPES` command to retrieve the `notification_channel` (SQS ARN) and configured the S3 event notification to send events to this queue.
 
@@ -268,7 +268,7 @@ The star schema in the consumption schema enables efficient analytical queries f
 The ETL process involves the following steps across the three schemas:
 
 1. **Stage to Clean**:
-   - Streams in the stage schema (e.g., `location_stream`) capture changes in the raw tables.
+   - Streams in the stage schema (e.g., `location_stm`) capture changes in the raw tables.
    - A task triggers a stored procedure to merge the stream data into the clean schema.
    - Transformations include:
      - Casting data to proper data types (e.g., `location_id` as `INT`, `city` as `VARCHAR`).
