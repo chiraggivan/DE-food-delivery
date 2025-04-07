@@ -175,7 +175,7 @@ CREATE OR REPLACE STORAGE INTEGRATION si_s3_to_snowflake
     TYPE = EXTERNAL_STAGE
     STORAGE_PROVIDER = S3
     ENABLED = TRUE
-    STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/S3toSnowflakeRole'
+    STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/SnowflakeToS3role'
     STORAGE_ALLOWED_LOCATIONS = ('s3://food-delivery-prod-rds-s3/');
 
 -- Create an external stage to access the S3 bucket
