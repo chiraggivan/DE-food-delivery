@@ -171,21 +171,21 @@ The following Snowflake SQL commands set up the storage integration, stage, and 
 
 ```sql
 -- Create a storage integration to connect Snowflake to S3
-CREATE OR REPLACE STORAGE INTEGRATION rds_to_s3_int
+CREATE OR REPLACE STORAGE INTEGRATION si_s3_to_snowflake
     TYPE = EXTERNAL_STAGE
     STORAGE_PROVIDER = S3
     ENABLED = TRUE
-    STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/RDStoS3role'
-    STORAGE_ALLOWED_LOCATIONS = ('s3://test.complete.food-delivery/');
+    STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::902651842113:role/S3toSnowflakeRole'
+    STORAGE_ALLOWED_LOCATIONS = ('s3://food-delivery-prod-rds-s3/');
 
 -- Create an external stage to access the S3 bucket
-CREATE OR REPLACE STAGE rds_to_s3_stage
-    URL = 's3://test.complete.food-delivery/'
-    STORAGE_INTEGRATION = rds_to_s3_int
+CREATE OR REPLACE STAGE stg_s3_to_snowflake
+    URL = 's3://food-delivery-prod-rds-s3/'
+    STORAGE_INTEGRATION = si_s3_to_snowflake
     FILE_FORMAT = ff_csv;
 
 -- Create a Snowpipe for automated ingestion into the location table
-CREATE OR REPLACE PIPE rds_to_s3_snowpipe
+CREATE OR REPLACE PIPE pipe_s3_to_location
     AUTO_INGEST = TRUE
     AS
     COPY INTO location
@@ -202,7 +202,7 @@ CREATE OR REPLACE PIPE rds_to_s3_snowpipe
             metadata$file_last_modified AS _stg_file_load_ts,
             metadata$file_content_key AS _stg_file_md5,
             current_timestamp AS _copy_data_ts
-        FROM @rds_to_s3_stage/location/csv t
+        FROM @stg_s3_to_snowflake/location/csv t
     )
     FILE_FORMAT = (format_name = ff_csv);
 
@@ -243,6 +243,15 @@ This project focuses on transforming raw data in Snowflake and organizing it int
 - **Snowflake**: Snowflake Data Cloud (for data warehousing, ETL, and star schema modeling), Streams (for change data capture), Tasks (for scheduling), Stored Procedures (for data merging)
 - **SQL**: Used for writing ETL scripts, stored procedures, and creating the star schema
 
+### Data Used
+- **Source**: Snowflake stage schema tables (`location`, `customer`, `orders`, `order_item`, `delivery`, and 4 others), loaded from S3 in Part 2.
+- **Tables**:
+  - Non-transactional: `location` , `customer`, `restaurant`, `menu`, `customer_address`, `delivery_agent`.
+  - Transactional: `orders`, `order_item`, `delivery`.
+- **Data Type**: Synthetic data, as generated in Part 1.
+- **Volume**: Approximately 5–35 rows per table during testing.
+- **Frequency**: The ETL process runs whenever there is data in the streams, triggered by Snowpipe loads every 4 hours (from Part 2).
+
 ### Architecture
 
 The ETL process is automated using Snowflake streams, tasks, and stored procedures:
@@ -254,15 +263,6 @@ The star schema in the consumption schema enables efficient analytical queries f
 
 ![Architecture Diagram](etl-snowflake-architecture.png)  
 *(Diagram to be created: Stage Schema (raw tables) → Streams → Clean Schema (transformed tables) → Streams → Consumption Schema (dim tables, fact table))*
-
-### Data Used
-- **Source**: Snowflake stage schema tables (`location`, `customer`, `orders`, `order_item`, `delivery`, and 4 others), loaded from S3 in Part 2.
-- **Tables**:
-  - Non-transactional: `location` (e.g., `location_id`, `city`, `state`, `createdDate`, `modifiedDate`), `customer` (e.g., `customer_id`, `name`, `email`, `createdDate`, `modifiedDate`), and 4 others.
-  - Transactional: `orders` (e.g., `order_id`, `customer_id`, `location_id`, `order_date`), `order_item` (e.g., `order_item_id`, `order_id`, `item_name`, `quantity`, `total_amount`), `delivery` (e.g., `delivery_id`, `order_id`, `delivery_time`).
-- **Data Type**: Synthetic data, as generated in Part 1.
-- **Volume**: Approximately 5–35 rows per table during testing.
-- **Frequency**: The ETL process runs whenever there is data in the streams, triggered by Snowpipe loads every 4 hours (from Part 2).
 
 ### ETL Process
 The ETL process involves the following steps across the three schemas:
@@ -314,9 +314,8 @@ RETURNS STRING
 LANGUAGE SQL
 AS
 $$  
-BEGIN
-    
-  $$;
+
+$$;
 
 -- Create a task to run the stored procedure when the stream has data
 CREATE OR REPLACE TASK stage.merge_location_task
