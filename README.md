@@ -261,7 +261,7 @@ The ETL process is automated using Snowflake streams, tasks, and stored procedur
 
 The star schema in the consumption schema enables efficient analytical queries for business intelligence and reporting.
 
-![Architecture Diagram](etl-snowflake-architecture.png)  
+![Architecture Diagram](/resources/etl-snowflake-architecture.png)  
 *(Diagram to be created: Stage Schema (raw tables) → Streams → Clean Schema (transformed tables) → Streams → Consumption Schema (dim tables, fact table))*
 
 ### ETL Process
