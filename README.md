@@ -350,7 +350,7 @@ AS
 ### SQL code : 
 - Find the complete snowflake for location entity
     -  Procedure's SQL code: [procedures](/resources/snowflake_scripts/procedures/procedures-for-location.sql)
-    -  Task's SQL code: [procedures](/resources/snowflake_scripts/tasks/tasks-for-location.sql)
+    -  Task's SQL code: [tasks](/resources/snowflake_scripts/tasks/tasks-for-location.sql)
 
   *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder called snowflake_staging_script)*
 
