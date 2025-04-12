@@ -352,7 +352,7 @@ AS
     -  Procedure's SQL code: [procedures](/resources/snowflake_scripts/procedures/procedures-for-location.sql)
     -  Task's SQL code: [tasks](/resources/snowflake_scripts/tasks/tasks-for-location.sql)
 
-  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder called snowflake_staging_script)*
+  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder called [snowflake_scripts](/resources/snowflake_scripts))*
 
 #### Results and Impact
 - **Focus on Value**: Highlighted how the star schema enables specific business insights (e.g., revenue by city tier, delivery trends), which aligns with the project’s goal of supporting analytics for a food delivery company.
