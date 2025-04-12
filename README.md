@@ -347,6 +347,11 @@ AS
   CALL clean.merge_transactional_to_fact();
 ```
 
+### SQL code : 
+- Find the complete snowflake procedure's SQL code for location entity here: [procedures](/resources/snowflake_procedures_script/procedures-for-location.sql)
+
+  *(Note: The above sql file only shows the sql code for location entity. Other sql code are in the folder called snowflake_staging_script)*
+
 #### Results and Impact
 - **Focus on Value**: Highlighted how the star schema enables specific business insights (e.g., revenue by city tier, delivery trends), which aligns with the project’s goal of supporting analytics for a food delivery company.
 - **Performance Metrics**: Included query performance (under 5 seconds) to show the efficiency of the star schema, even with a small test dataset.
